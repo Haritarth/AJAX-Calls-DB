@@ -1,0 +1,102 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+
+<div class="col-md-12">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h3 class="panel-title">Please enter the details below.</h3>
+        </div>
+        <div class="panel-body">
+            <div class="form-group col-md-5">
+                <label>First Name</label>
+                <input type="text" name="FirstName" id="FirstName" class="form-control" placeholder="Enter your First Name" required="" />
+            </div>
+            <div class="form-group col-md-5">
+                <label>Last Name</label>
+                <input type="text" name="LastName" id="LastName" class="form-control" placeholder="Enter your Last Name" required="" />
+            </div>
+
+            <div class="form-group col-md-1">
+                <div style="float: right; display:inline-block;">
+                    <input class="btn btn-primary" name="submitButton" id="btnSave" value="Save" type="button">
+                </div>
+            </div>
+        </div>
+    </div><hr />
+    <table id="tblStudent" class="table table-bordered table-striped table-responsive table-hover">
+        <thead>
+            <tr>
+                <th align="left" class="productth">ID</th>
+                <th align="left" class="productth">First Name</th>
+                <th align="left" class="productth">Last Name</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+<script src="~/Scripts/jquery-3.4.1.js"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.js"></script>
+@section Scripts
+{
+    <script type="text/javascript">
+
+    $(function () {
+        $("#btnSave").click(function () {
+            //alert("");
+            var std = {};
+            std.FirstName = $("#FirstName").val();
+            std.LastName = $("#LastName").val();
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("createStudent")',
+                data: '{std: ' + JSON.stringify(std) + '}',
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                cache: false,
+                success: function () {
+                   // alert("Data has been added successfully.");
+                    LoadData();
+                },
+                error: function () {
+                    if (std.FirstName == null)
+                    alert("First Name is required");
+                    else (std.LastName == null)
+                    alert("Last Name is required");
+                }
+            });
+            return false;
+        });
+    });
+
+    function LoadData() {
+        $("#tblStudent tbody tr").remove();
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("getStudent")',
+            dataType: 'json',
+            data: { id: '' },
+            cache: false,
+            success: function (data) {
+                var items = '';
+                $.each(data, function (i, item) {
+                    var rows = "<tr>"
+                    + "<td class='prtoducttd'>" + item.StudentID + "</td>"
+                    + "<td class='prtoducttd'>" + item.FirstName + "</td>"
+                    + "<td class='prtoducttd'>" + item.LastName + "</td>"
+                    + "</tr>";
+                    $('#tblStudent tbody').append(rows);
+                });
+            },
+            error: function (ex) {
+                var r = jQuery.parseJSON(response.responseText);
+                alert("Message: " + r.Message);
+                alert("StackTrace: " + r.StackTrace);
+                alert("ExceptionType: " + r.ExceptionType);
+            }
+        });
+        return false;
+    }
+    </script>
+}
